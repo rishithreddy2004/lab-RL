@@ -1,0 +1,51 @@
+import numpy as np
+
+prices = [50, 75, 100]
+prob = [0.3, 0.2, 0.1]
+rounds = 500
+
+def reward(i):
+    return prices[i] if np.random.rand() < prob[i] else 0
+
+# Epsilon-Greedy
+def epsilon_greedy(e=0.1):
+    Q = [0]*3
+    N = [0]*3
+    total = 0
+    for _ in range(rounds):
+        a = np.random.randint(3) if np.random.rand() < e else Q.index(max(Q))
+        r = reward(a)
+        N[a] += 1
+        Q[a] += (r - Q[a]) / N[a]
+        total += r
+    return total
+
+# UCB
+def ucb():
+    Q = [0]*3
+    N = [0]*3
+    total = 0
+    for t in range(1, rounds+1):
+        a = t-1 if t <= 3 else np.argmax([Q[i] + np.sqrt(2*np.log(t)/N[i]) for i in range(3)])
+        r = reward(a)
+        N[a] += 1
+        Q[a] += (r - Q[a]) / N[a]
+        total += r
+    return total
+
+# Thompson Sampling
+def thompson():
+    s = [1]*3
+    f = [1]*3
+    total = 0
+    for _ in range(rounds):
+        a = np.argmax([np.random.beta(s[i], f[i]) for i in range(3)])
+        r = reward(a)
+        s[a] += r > 0
+        f[a] += r == 0
+        total += r
+    return total
+
+print("Epsilon-Greedy:", epsilon_greedy())
+print("UCB:", ucb())
+print("Thompson Sampling:", thompson())
