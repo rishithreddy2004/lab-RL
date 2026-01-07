@@ -1,0 +1,32 @@
+import numpy as np
+import random
+maze = np.array([
+    [0, 0, 0, 1],
+    [0, -1, 0, -1],
+    [0, 0, 0, 0]
+])
+
+alpha = 0.1
+gamma = 0.9
+episodes = 300
+
+V = np.zeros(maze.shape)
+actions = [(-1,0), (1,0), (0,-1), (0,1)]
+
+def step(s, a):
+    x, y = s
+    dx, dy = a
+    nx, ny = x + dx, y + dy
+    if nx < 0 or ny < 0 or nx >= maze.shape[0] or ny >= maze.shape[1]:
+        return s, -1
+    return (nx, ny), maze[nx, ny]
+
+for _ in range(episodes):
+    s = (0, 0)
+    while maze[s] != 1:
+        a = random.choice(actions)
+        ns, r = step(s, a)
+        V[s] = V[s] + alpha * (r + gamma * V[ns] - V[s])
+        s = ns
+
+print("Values:\n", V)
